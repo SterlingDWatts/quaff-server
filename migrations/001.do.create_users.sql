@@ -1,4 +1,4 @@
-CREATE TABLE user (
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
@@ -6,5 +6,5 @@ CREATE TABLE user (
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
   nickname TEXT,
-  date_created TIMESTAMP DEFAULT now() NOT NULL,
+  date_created TIMESTAMP DEFAULT now() NOT NULL
 );
