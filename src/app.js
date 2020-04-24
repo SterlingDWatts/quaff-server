@@ -7,6 +7,7 @@ const validateBearerToken = require("./middleware/validate-bearer-token");
 const errorHandler = require("./middleware/error-handler");
 const { NODE_ENV } = require("./config");
 const usersRouter = require("./users/users-router");
+const authRouter = require("./auth/auth-router");
 
 // create Express app
 const app = express();
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users", usersRouter);
+app.use("/api/auth", authRouter);
 
 // error handling middleware gives short response if in production
 app.use(errorHandler);

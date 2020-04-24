@@ -76,9 +76,18 @@ function seedUsers(db, users) {
     );
 }
 
+function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+  const token = jwt.sign({ id: user.id }, secret, {
+    subject: user.username,
+    algorithm: "HS256"
+  });
+  return `Bearer ${token}`;
+}
+
 module.exports = {
   makeUsersArray,
 
   cleanTables,
-  seedUsers
+  seedUsers,
+  makeAuthHeader
 };
