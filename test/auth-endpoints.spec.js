@@ -6,7 +6,7 @@ const helpers = require("./test-helpers");
 describe("Auth Endpoints", () => {
   let db;
 
-  const testUsers = helpers.makeUsersArray();
+  const { testUsers } = helpers.makeQuaffFixtures();
   const testUser = testUsers[0];
 
   before("make knex instance", () => {

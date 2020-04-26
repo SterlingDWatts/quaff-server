@@ -1,5 +1,23 @@
 const AuthService = require("../auth/auth-service");
 
+function getUserId(req, res, next) {
+  const authToken = req.get("Authorization") || "";
+  const possibleUser = {
+    id: 0
+  };
+  if (!authToken.toLowerCase().startsWith("bearer ")) {
+    req.user = possibleUser;
+  } else {
+    const bearerToken = authToken.slice(7, authToken.length);
+    const payload = AuthService.verifyJwt(bearerToken);
+    if (payload.id >= 0) {
+      possibleUser.id = payload.id;
+    }
+    req.user = possibleUser;
+  }
+  next();
+}
+
 function requireAuth(req, res, next) {
   const authToken = req.get("Authorization") || "";
 
@@ -31,5 +49,6 @@ function requireAuth(req, res, next) {
 }
 
 module.exports = {
-  requireAuth
+  requireAuth,
+  getUserId
 };
