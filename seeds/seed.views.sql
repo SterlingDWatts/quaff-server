@@ -9,12 +9,18 @@ TRUNCATE
 INSERT INTO views (user_id, question_id, chosen_answer_id)
 VALUES
   (1, 1, 1),
-  (1, 2, 2),
-  (1, 4, 1),
-  (1, 5, 1),
-  (1, 6, 3),
-  (1, 7, 1),
-  (1, 8, 1);
+  (1, 2, 6),
+  (1, 4, 9),
+  (1, 5, 21),
+  (1, 6, 27),
+  (1, 7, 29),
+  (1, 8, 33),
+  (1, 1, 1),
+  (1, 2, 6),
+  (1, 4, 10),
+  (1, 5, 21),
+  (1, 6, 28),
+  (1, 7, 29);
 
 INSERT INTO tests (user_id, module_id, score)
 VALUES

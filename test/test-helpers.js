@@ -320,6 +320,54 @@ function makeExpectedModule(mod, userId, tests) {
   };
 }
 
+function makeExpectedTest(modules, questions, answers, moduleId) {
+  const mod = modules.find(mod => mod.id === moduleId);
+  mod.questions = questions.filter(question => question.module_id === mod.id);
+  mod.questions.forEach(question => {
+    question.answers = answers.filter(
+      answer => answer.question_id === question.id
+    );
+  });
+  return mod;
+}
+
+function makeExpectedTopicTest(
+  topics,
+  questionTopics,
+  questions,
+  answers,
+  topicRelationships,
+  topicId
+) {
+  const topicIds = [topicId];
+  const parentTopicId = topicRelationships.find(
+    topic => topic.child_id === topicId
+  );
+  if (parentTopicId) {
+    topicIds.push(parentTopicId.parent_id);
+  }
+  const topicTestArray = [];
+  topicIds.forEach(topic => {
+    const topicObj = topics.find(t => t.id === topic);
+    const questionTopicArray = questionTopics.filter(
+      question => question.topic_id === topic
+    );
+    const questionArray = [];
+    questionTopicArray.forEach(question => {
+      const answersArray = answers.filter(
+        answer => answer.question_id === question.question_id
+      );
+      const questionObj = questions.find(q => q.id === question.question_id);
+      questionArray.push({ ...questionObj, answers: answersArray });
+    });
+    topicTestArray.push({
+      ...topicObj,
+      questions: questionArray
+    });
+  });
+  return topicTestArray;
+}
+
 function makeQuaffFixtures() {
   const testUsers = makeUsersArray();
   const testModules = makeModulesArray();
@@ -455,6 +503,8 @@ module.exports = {
   makeViewsArray,
   makeTestsArray,
   makeExpectedModule,
+  makeExpectedTest,
+  makeExpectedTopicTest,
 
   makeQuaffFixtures,
   cleanTables,

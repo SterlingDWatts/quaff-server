@@ -1,3 +1,5 @@
+const Treeize = require("treeize");
+
 const ModulesService = {
   getAllModules(db, userId) {
     return db
@@ -17,6 +19,36 @@ const ModulesService = {
       )
       .groupBy("m.id")
       .orderBy("m.position");
+  },
+  findNextModule(modules) {
+    return modules.findIndex(
+      mod => parseFloat(mod.max_score) < 0.75 || mod.max_score == null
+    );
+  },
+  getById(db, modId) {
+    return db
+      .from("modules AS m")
+      .select(
+        "a.id AS questions:answers:id",
+        "a.correct AS questions:answers:correct",
+        "a.content AS questions:answers:content",
+        "a.question_id AS questions:answers:question_id",
+        "q.id AS questions:id",
+        "q.content AS questions:content",
+        "q.module_id AS questions:module_id",
+        "m.id",
+        "m.name",
+        "m.picture",
+        "m.position"
+      )
+      .leftJoin("questions AS q", "m.id", "q.module_id")
+      .leftJoin("answers AS a", "q.id", "a.question_id")
+      .where("m.id", modId);
+  },
+  serializeModule(mod) {
+    const moduleTree = new Treeize();
+    const moduleData = moduleTree.grow(mod).getData()[0];
+    return moduleData;
   }
 };
 

@@ -64,7 +64,13 @@ describe("Modules endpoints", () => {
           });
           return supertest(app)
             .get("/api/modules")
-            .expect(200, expetedModules);
+            .expect(200)
+            .expect(res => {
+              expect(res.body[0].id).to.eql(expetedModules[0].id);
+              expect(res.body[0].name).to.eql(expetedModules[0].name);
+              expect(res.body[0].picture).to.eql(expetedModules[0].picture);
+              expect(res.body[0].max_score).to.eql(null);
+            });
         });
       });
 
@@ -86,6 +92,63 @@ describe("Modules endpoints", () => {
               );
             });
         });
+      });
+    });
+  });
+
+  describe("GET /api/modules/:module_id", () => {
+    context("Given no modules", () => {
+      beforeEach("insert quaff", () =>
+        helpers.seedQuaff(
+          db,
+          testUsers,
+          testModules,
+          testTopics,
+          testTopicRelationships,
+          testQuestions,
+          testQuestionTopics,
+          testAnswers,
+          testViews,
+          testTests
+        )
+      );
+
+      it("responds with 404", () => {
+        const nonExistantModule = 123456789;
+        return supertest(app)
+          .get(`/api/modules/${nonExistantModule}`)
+          .expect(404, { error: "Module doesn't exist" });
+      });
+    });
+
+    context("Given there are modules in the database", () => {
+      beforeEach("insert quaff", () =>
+        helpers.seedQuaff(
+          db,
+          testUsers,
+          testModules,
+          testTopics,
+          testTopicRelationships,
+          testQuestions,
+          testQuestionTopics,
+          testAnswers,
+          testViews,
+          testTests
+        )
+      );
+
+      it("responds with 200 and the specified module", () => {
+        const moduleId = 1;
+        const expectedModule = helpers.makeExpectedTest(
+          testModules,
+          testQuestions,
+          testAnswers,
+          moduleId
+        );
+
+        return supertest(app)
+          .get(`/api/modules/${moduleId}`)
+          .expect(200, expectedModule);
       });
     });
   });
