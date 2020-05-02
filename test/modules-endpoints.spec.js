@@ -59,38 +59,27 @@ describe("Modules endpoints", () => {
 
       context("Given an anonymous user", () => {
         it("responds with 200 and all the modules", () => {
-          const expetedModules = testModules.map(mod => {
-            return helpers.makeExpectedModule(mod, -1, testTests);
-          });
+          const expectedModules = testModules.map(mod =>
+            helpers.makeExpectedModule(mod, [])
+          );
+          expectedModules[0].next = true;
           return supertest(app)
             .get("/api/modules")
-            .expect(200)
-            .expect(res => {
-              expect(res.body[0].id).to.eql(expetedModules[0].id);
-              expect(res.body[0].name).to.eql(expetedModules[0].name);
-              expect(res.body[0].picture).to.eql(expetedModules[0].picture);
-              expect(res.body[0].max_score).to.eql(null);
-            });
+            .expect(200, expectedModules);
         });
       });
 
       context("Given a logged in user", () => {
         it("responds with 200 and all the modules with scores", () => {
-          const expetedModules = testModules.map(mod => {
-            return helpers.makeExpectedModule(mod, testUser.id, testTests);
-          });
+          const expectedModules = helpers.makeExpectedModules(
+            testModules,
+            testUser.id,
+            testTests
+          );
           return supertest(app)
             .get("/api/modules")
             .set("Authorization", helpers.makeAuthHeader(testUser))
-            .expect(200)
-            .expect(res => {
-              expect(res.body[0].id).to.eql(expetedModules[0].id);
-              expect(res.body[0].name).to.eql(expetedModules[0].name);
-              expect(res.body[0].picture).to.eql(expetedModules[0].picture);
-              expect(parseFloat(res.body[0].max_score)).to.eql(
-                expetedModules[0].max_score
-              );
-            });
+            .expect(200, expectedModules);
         });
       });
     });

@@ -10,6 +10,8 @@ const usersRouter = require("./users/users-router");
 const authRouter = require("./auth/auth-router");
 const modulesRouter = require("./modules/modules-router");
 const topicsRouter = require("./topics/topics-router");
+const viewsRouter = require("./views/views-router");
+const testsRouter = require("./tests/tests-router");
 
 // create Express app
 const app = express();
@@ -34,6 +36,8 @@ app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/modules", modulesRouter);
 app.use("/api/topics", topicsRouter);
+app.use("/api/views", viewsRouter);
+app.use("/api/tests", testsRouter);
 
 // error handling middleware gives short response if in production
 app.use(errorHandler);

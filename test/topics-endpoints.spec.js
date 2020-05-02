@@ -110,7 +110,7 @@ describe("Topics Endpoints", () => {
               id: 1,
               name: "Topic 1",
               picture: "https://topic-1-pic.com",
-              seen: null,
+              seen: "2",
               correct: null
             },
             {
@@ -177,24 +177,38 @@ describe("Topics Endpoints", () => {
           testTests
         )
       );
+
       it("responds with 200 and the specified topic", () => {
-        const topicId = 1;
+        const topicId = 2;
         const expectedTopic = helpers.makeExpectedTopicTest(
           testTopics,
           testQuestionTopics,
           testQuestions,
           testAnswers,
           testTopicRelationships,
-          topicId
+          testViews,
+          topicId,
+          testUser.id
         );
-
+        const expectedTopicIds = [];
+        const expectedQuestionIds = [];
+        expectedTopic.forEach(topic => {
+          expectedTopicIds.push(topic.id);
+          expectedQuestionIds.push(
+            ...topic.questions.map(question => question.id)
+          );
+        });
         return supertest(app)
           .get(`/api/topics/${topicId}`)
+          .set("Authorization", helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
-            expect(res.body.map(topic => topic.id)).to.include(
-              expectedTopic.map(topic => topic.id)[0]
-            );
+            res.body.forEach(topic => {
+              expect(expectedTopicIds).to.include(topic.id);
+              topic.questions.forEach(question => {
+                expect(expectedQuestionIds).to.include(question.id);
+              });
+            });
           });
       });
     });

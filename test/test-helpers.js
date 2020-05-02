@@ -273,6 +273,18 @@ function makeViewsArray(users, questions, answers) {
       user_id: users[0].id,
       question_id: questions[2].id,
       chosen_answer_id: answers[10].id
+    },
+    {
+      id: 4,
+      user_id: users[0].id,
+      question_id: questions[3].id,
+      chosen_answer_id: answers[13].id
+    },
+    {
+      id: 5,
+      user_id: users[0].id,
+      question_id: questions[7].id,
+      chosen_answer_id: answers[17].id
     }
   ];
 }
@@ -300,17 +312,14 @@ function makeTestsArray(users, modules) {
   ];
 }
 
-function makeExpectedModule(mod, userId, tests) {
+function makeExpectedModule(mod, tests = []) {
   let score = null;
-  const testScores = tests.filter(
-    test => test.user_id === userId && test.module_id === mod.id
-  );
+  const testScores = tests.filter(test => test.module_id === mod.id);
   if (testScores && testScores.length > 0) {
-    const scores = testScores
+    score = testScores
       .map(test => test.score)
-      .reduce((curr, prev) => (curr > prev ? curr : prev));
-
-    score = scores;
+      .reduce((acc, curr) => (curr > acc ? curr : acc));
+    score = score.toString() + "000";
   }
   return {
     id: mod.id,
@@ -318,6 +327,16 @@ function makeExpectedModule(mod, userId, tests) {
     name: mod.name,
     picture: mod.picture
   };
+}
+
+function makeExpectedModules(modules, userId, tests) {
+  const userTests = tests.filter(test => test.user_id === userId);
+  const updatedModules = modules.map(mod => makeExpectedModule(mod, userTests));
+  const nextIndex = updatedModules.findIndex(
+    mod => mod.max_score == null || Number(mod.max_score) < 0.75
+  );
+  updatedModules[nextIndex].next = true;
+  return updatedModules;
 }
 
 function makeExpectedTest(modules, questions, answers, moduleId) {
@@ -331,39 +350,117 @@ function makeExpectedTest(modules, questions, answers, moduleId) {
   return mod;
 }
 
+function _makeTopicsAndChildTopics(topicRelationships, topicId) {
+  const topicIdsArray = [topicId];
+  const childRelationships = topicRelationships.filter(
+    topicRelationship => topicRelationship.parent_id === topicId
+  );
+  childRelationships.forEach(relationship => {
+    topicIdsArray.push(relationship.child_id);
+  });
+  return topicIdsArray;
+}
+
+function _makeQuestionObject(question, answers) {
+  const questionObject = {
+    id: question.id,
+    content: question.content
+  };
+  const filteredAnswers = answers.filter(
+    answer => answer.question_id === questionObject.id
+  );
+  const answersArray = [];
+  filteredAnswers.forEach(answer => {
+    answersArray.push({
+      content: answer.content,
+      correct: answer.correct,
+      id: answer.id
+    });
+  });
+  questionObject.answers = answersArray;
+  return questionObject;
+}
+
+function _makeSeenTopicQuestions(
+  questions,
+  questionTopics,
+  answers,
+  views,
+  userId,
+  topicId
+) {
+  const userViews = views.filter(view => view.user_id === userId);
+  const uniqueQuestions = [];
+  const uniqueQuestionIds = [];
+  userViews.forEach(view => {
+    const viewTopic = questionTopics.find(
+      qt => qt.question_id === view.question_id
+    );
+    if (
+      !uniqueQuestionIds.includes(view.question_id) &&
+      viewTopic.topic_id === topicId
+    ) {
+      const questionObject = _makeQuestionObject(
+        questions.find(question => question.id === view.question_id),
+        answers
+      );
+      uniqueQuestions.push(questionObject);
+      uniqueQuestionIds.push(view.question_id);
+    }
+  });
+  return uniqueQuestions;
+}
+
+function _makeTopicObj(
+  topicId,
+  topics,
+  questionTopics,
+  questions,
+  answers,
+  views,
+  userId
+) {
+  const topicObject = {
+    ...topics.find(topic => topic.id === topicId)
+  };
+  const seenTopicQuestions = _makeSeenTopicQuestions(
+    questions,
+    questionTopics,
+    answers,
+    views,
+    userId,
+    topicId
+  );
+  topicObject.questions = seenTopicQuestions;
+  return topicObject;
+}
+
 function makeExpectedTopicTest(
   topics,
   questionTopics,
   questions,
   answers,
   topicRelationships,
-  topicId
+  views,
+  topicId,
+  userId
 ) {
-  const topicIds = [topicId];
-  const parentTopicId = topicRelationships.find(
-    topic => topic.child_id === topicId
-  );
-  if (parentTopicId) {
-    topicIds.push(parentTopicId.parent_id);
-  }
+  const topicIds = _makeTopicsAndChildTopics(topicRelationships, topicId);
+
   const topicTestArray = [];
-  topicIds.forEach(topic => {
-    const topicObj = topics.find(t => t.id === topic);
-    const questionTopicArray = questionTopics.filter(
-      question => question.topic_id === topic
+  topicIds.forEach(id => {
+    const topicObject = _makeTopicObj(
+      id,
+      topics,
+      questionTopics,
+      questions,
+      answers,
+      views,
+      userId
     );
-    const questionArray = [];
-    questionTopicArray.forEach(question => {
-      const answersArray = answers.filter(
-        answer => answer.question_id === question.question_id
-      );
-      const questionObj = questions.find(q => q.id === question.question_id);
-      questionArray.push({ ...questionObj, answers: answersArray });
-    });
-    topicTestArray.push({
-      ...topicObj,
-      questions: questionArray
-    });
+    if (topicObject.questions.length > 0) {
+      topicTestArray.push(topicObject);
+    }
   });
   return topicTestArray;
 }
@@ -503,6 +600,7 @@ module.exports = {
   makeViewsArray,
   makeTestsArray,
   makeExpectedModule,
+  makeExpectedModules,
   makeExpectedTest,
   makeExpectedTopicTest,
 

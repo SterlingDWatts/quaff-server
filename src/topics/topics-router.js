@@ -14,8 +14,7 @@ topicsRouter.route("/").get(getUserId, (req, res, next) => {
 
 topicsRouter
   .route("/:topic_id")
-  .all(checkTopicExists)
-  .get((req, res) => {
+  .get(getUserId, checkTopicExists, (req, res) => {
     res.json(TopicsService.serializeTopic(res.topic));
   });
 
@@ -23,7 +22,8 @@ async function checkTopicExists(req, res, next) {
   try {
     const topic = await TopicsService.getById(
       req.app.get("db"),
-      req.params.topic_id
+      req.params.topic_id,
+      req.user.id
     );
 
     if (!topic || topic.length < 1) {
