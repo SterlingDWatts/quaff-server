@@ -29,10 +29,11 @@ authRouter.post("/login", jsonBodyParser, (req, res, next) => {
         dbUser.password
       ).then(compareMatch => {
         if (!compareMatch) {
-          return res
-            .status(400)
-            .json({ error: "Invalid username or password" });
+          return res.status(400).json({
+            error: "Invalid username or password"
+          });
         }
+
         const sub = dbUser.username;
         const payload = { id: dbUser.id };
         res.send({

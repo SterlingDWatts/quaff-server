@@ -75,7 +75,6 @@ describe("Auth Endpoints", () => {
         process.env.JWT_SECRET,
         {
           subject: testUser.username,
-          expiresIn: process.env.JWT_EXPIRY,
           algorithm: "HS256"
         }
       );
@@ -97,7 +96,6 @@ describe("Auth Endpoints", () => {
         process.env.JWT_SECRET,
         {
           subject: testUser.username,
-          expiresIn: process.env.JWT_EXPIRY,
           algorithm: "HS256"
         }
       );
