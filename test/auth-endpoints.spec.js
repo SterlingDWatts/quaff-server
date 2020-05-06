@@ -6,7 +6,17 @@ const helpers = require("./test-helpers");
 describe("Auth Endpoints", () => {
   let db;
 
-  const { testUsers } = helpers.makeQuaffFixtures();
+  const {
+    testUsers,
+    testModules,
+    testTopics,
+    testTopicRelationships,
+    testQuestions,
+    testQuestionTopics,
+    testAnswers,
+    testViews,
+    testTests
+  } = helpers.makeQuaffFixtures();
   const testUser = testUsers[0];
 
   before("make knex instance", () => {
@@ -102,6 +112,41 @@ describe("Auth Endpoints", () => {
       return supertest(app)
         .post("/api/auth/refresh")
         .set("Authorization", helpers.makeAuthHeader(testUser))
+        .expect(200, {
+          authToken: expectedToken
+        });
+    });
+  });
+
+  describe("GET /api/auth/demo", () => {
+    const updatedTestUsers = testUsers.slice();
+    updatedTestUsers[2] = { ...testUsers[2], username: "DemoAccount" };
+    const demoUser = updatedTestUsers[2];
+    beforeEach("insert quaff", () =>
+      helpers.seedQuaff(
+        db,
+        updatedTestUsers,
+        testModules,
+        testTopics,
+        testTopicRelationships,
+        testQuestions,
+        testQuestionTopics,
+        testAnswers,
+        testViews,
+        testTests
+      )
+    );
+    it("responds 200 and JWT auth token", () => {
+      const expectedToken = jwt.sign(
+        { id: demoUser.id },
+        process.env.JWT_SECRET,
+        {
+          subject: demoUser.username,
+          algorithm: "HS256"
+        }
+      );
+      return supertest(app)
+        .get("/api/auth/demo")
         .expect(200, {
           authToken: expectedToken
         });

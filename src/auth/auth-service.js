@@ -21,6 +21,16 @@ const AuthService = {
     return jwt.verify(token, config.JWT_SECRET, {
       algorithms: ["HS256"]
     });
+  },
+  deleteViews(db, userId) {
+    return db("views")
+      .where("user_id", userId)
+      .del();
+  },
+  deleteTests(db, userId) {
+    return db("tests")
+      .where("user_id", userId)
+      .del();
   }
 };
 

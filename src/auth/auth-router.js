@@ -52,4 +52,18 @@ authRouter.post("/refresh", requireAuth, (req, res) => {
   });
 });
 
+authRouter.get("/demo", (req, res, next) => {
+  AuthService.deleteViews(req.app.get("db"), 3)
+    .then(response => {
+      AuthService.deleteTests(req.app.get("db"), 3)
+        .then(resp => {
+          res.send({
+            authToken: AuthService.createJwt("DemoAccount", { id: 3 })
+          });
+        })
+        .catch(next);
+    })
+    .catch(next);
+});
+
 module.exports = authRouter;
