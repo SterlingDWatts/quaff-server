@@ -1,18 +1,27 @@
-# Express Boilerplate!
+# Quaff Quizz
 
-This is a boilerplate project used for starting new projects!
+## About
 
-## Set up
+Quaff Quizz is an interactive wine learning experience. Learn new material in bite sized chunks and later study the topics already encountered to solidify knowledge.
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+## Endpoints
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
-7. Update the values in ./src/config.js and ./test/setup.js
+1. /auth Endpoints
+   - POST /login: handles loggin in
+   - POST /refresh: handles refreshing credentials for logged in user
+   - GET /demo: wipes all demo activity then sends demo token
+2. /modules Endpoints
+   - GET /: send all modules and scores for a given user
+   - GET /:module_id: send module questions and answers
+3. /topics Endpoints
+   - GET /: send all topics for a given user
+   - GET /:topic_id: send all topic questions and answers
+4. /users Endpoints
+   - POST /: handles creating a new account
+5. /tests Endpoints
+   - POST /: handles adding information from a test
+6. /views Endpoints
+   - POST /: handles adding information from answering questions
 
 ## Scripts
 
@@ -26,3 +35,7 @@ Complete the following steps to start a new project (NEW-PROJECT-NAME):
 ## Deploying
 
 When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+
+## Live site
+
+[Quaff Quizz](https://quaff.now.sh)
